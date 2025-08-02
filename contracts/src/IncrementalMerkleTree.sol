@@ -6,7 +6,10 @@ import {Poseidon2, Field} from "@poseidon/src/Poseidon2.sol";
 contract IncrementalMerkleTree {
     uint32 public immutable i_depth;
     Poseidon2 public immutable i_hasher;
-    bytes32 public s_root;
+
+    mapping(uint256 => bytes32) public s_roots;
+    uint32 public constant ROOT_HISTORY_SIZE = 30;
+    uint32 public s_currentRootIndex;
 
     uint32 public s_nextLeafIndex;
     mapping(uint32 => bytes32) public s_cachedSubtrees;
@@ -29,7 +32,7 @@ contract IncrementalMerkleTree {
 
         // initialize the tree with zeros (precompute all the zero subtrees)
         // store the initial root in storage
-        s_root = zeros(_depth - 1);
+        s_roots[0] = zeros(_depth);
     }
 
     function _insert(bytes32 _leaf) internal returns (uint32){
@@ -62,10 +65,32 @@ contract IncrementalMerkleTree {
             currentIndex = currentIndex / 2;
         }
         // store the root
-        s_root = currentHash;
+        uint32 newRootIndex = (s_currentRootIndex + 1) % ROOT_HISTORY_SIZE;
+        s_currentRootIndex = newRootIndex;
+        s_roots[newRootIndex] = currentHash;
         // increment the next leaf index
         s_nextLeafIndex = _nextLeafIndex + 1;
         return _nextLeafIndex;
+    }
+
+    function isKnownRoot(bytes32 _root) public view returns (bool) {
+        // check if the root is zero
+        if (_root == bytes32(0)) {
+            return false;
+        }
+        // check if the root matches one in s_roots
+        uint32 _currentRootIndex = s_currentRootIndex;
+        uint32 i = _currentRootIndex;
+        do {
+            if (s_roots[i] == _root) {
+                return true;
+            }
+            if (i == 0) {
+                i = ROOT_HISTORY_SIZE; // wrap around to the last index
+            }
+            i--;
+        } while (i != _currentRootIndex);
+        return false;
     }
 
     function zeros(uint32 i) public pure returns (bytes32) {
