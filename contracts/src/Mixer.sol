@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-contract Mixer {
+import {IncrementalMerkleTree, Poseidon2} from "./IncrementalMerkleTree.sol";
+import {IVerifier} from "./IVerifier.sol";
+
+contract Mixer is IncrementalMerkleTree {
     IVerifier public immutable i_verifier;
 
     // mapping to store whether a commitment has been used
@@ -13,7 +16,7 @@ contract Mixer {
     error Mixer__CommitmentAlreadyAdded(bytes32 commitment);
     error Mixer__DepositAmountNotCorrect(uint256 amountSent, uint256 expectedAmount);
 
-    constructor(IVerifier _verifier) {
+    constructor(IVerifier _verifier, Poseidon2 _hasher, uint32 _merkleTreeDepth) IncrementalMerkleTree(_merkleTreeDepth, _hasher) {
         i_verifier = _verifier;
     }
 
@@ -28,9 +31,11 @@ contract Mixer {
         if(msg.value != DENOMINATION) {
             revert Mixer__DepositAmountNotCorrect(msg.value, DENOMINATION);
         }
-        // allow the user to send ETH and make sure it is of the correct fixed amount (denomination)
-        // add the commitment to a data structure containing all of the commitments
+        // add the commitment to on-chain incremental Metkle tree containing all of the commitments
+        uint32 insertedINdex = _insert(_commitment);
         s_commitments[_commitment] = true;
+
+        emit Deposit(_commitment, insertedIndex, block.timestamp);
     }
 
     // @notice Withdraw funds from the mixer in a private way
