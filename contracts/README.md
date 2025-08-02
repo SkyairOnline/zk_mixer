@@ -8,3 +8,4 @@
 - we need to check that the commitment is present in the Merkle tree
     - proposed root
     - Merkle tree
+- Check the nullifier matches the (public) nullifier hash

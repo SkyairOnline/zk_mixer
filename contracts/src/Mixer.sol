@@ -9,12 +9,15 @@ contract Mixer is IncrementalMerkleTree {
 
     // mapping to store whether a commitment has been used
     mapping(bytes32 => bool) public s_commitments;
+    mapping(bytes32 => bool) public s_nullifierHashes;
 
     // the denomination of the mixer, i.e. the amount of ETH that can be deposited
     uint256 public constant DENOMINATION = 0.001 ether;
 
     error Mixer__CommitmentAlreadyAdded(bytes32 commitment);
     error Mixer__DepositAmountNotCorrect(uint256 amountSent, uint256 expectedAmount);
+    error Mixer__UnknownRoot(bytes32 root);
+    error Mixer__NullifierAlreadyUsed(bytes32 nullifierHash);
 
     constructor(IVerifier _verifier, Poseidon2 _hasher, uint32 _merkleTreeDepth) IncrementalMerkleTree(_merkleTreeDepth, _hasher) {
         i_verifier = _verifier;
@@ -40,9 +43,17 @@ contract Mixer is IncrementalMerkleTree {
 
     // @notice Withdraw funds from the mixer in a private way
     // @param _proof proof that the user has the right to withdraw (they know a valid commitment)
-    function withdraw(bytes32 _proof) external {
-        // check that the proof is valid by calling the verifier contract
+    function withdraw(bytes32 _proof, bytes32 root, butes32 _nullifierHash) external {
+        // check that the root that was used in the proof mathces the root on-chain
+        if(_root != s_root) {
+            revert Mixer__UnknownRoot(_root);
+        }
         // check that the nullifier has not been used before (to prevent double spending)
+        if(s_nullifierHashes[_nullifierHash]) {
+            revert Mixer__NullifierAlreadyUsed(_nullifierHash);
+        }
+        // check that the proof is valid by calling the verifier contract
+        s_nullifierHashes[_nullifierHash] = true;
         // transfer the funds to the user
     }
 }
