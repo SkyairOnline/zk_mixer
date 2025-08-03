@@ -25,7 +25,7 @@ export default async function generateProof() {
         const honk = new UltraHonkBackend(circuit.bytecode, { threads: 1 });
         const input = {
             // Public Inputs,
-            root: merkleProof.root.toString(), // This should be the root of the merkle tree
+            root: merkleProof.root, // This should be the root of the merkle tree
             nullifier_hash: nullifierHash.toString(), // This should be the nullifier hash
             recipient: recipient, // This should be the recipient address
             // Private Inputs,
@@ -36,6 +36,7 @@ export default async function generateProof() {
         }
         const { witness } = await noir.execute(input);
         const originalLog = console.log;
+        console.log = () => {}; // Suppress console.log output from the proof generation
         const { proof, publicInputs } = await honk.generateProof(witness, { keccak: true });
         console.log = originalLog; // Restore console.log
         const result = ethers.AbiCoder.defaultAbiCoder().encode(

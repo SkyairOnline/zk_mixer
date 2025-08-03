@@ -16,25 +16,25 @@ contract IncrementalMerkleTree {
     uint32 public immutable i_depth;
     Poseidon2 public immutable i_hasher;
 
-    mapping(uint256 => bytes32) public s_roots;
-    uint32 public constant ROOT_HISTORY_SIZE = 30;
-    uint32 public s_currentRootIndex;
-
-    uint32 public s_nextLeafIndex;
     mapping(uint32 => bytes32) public s_cachedSubtrees;
+    mapping(uint256 => bytes32) public s_roots;
 
-    error IncrementalMerkleTree__DepthShouldBeGreaterThanZero();
-    error IncrementalMerkleTree__DepthShouldBeLessThan32();
+    uint32 public constant ROOT_HISTORY_SIZE = 30;
+    uint32 public s_currentRootIndex = 0;
+    uint32 public s_nextLeafIndex = 0;
+   
+    error IncrementalMerkleTree__DepthShouldBeGreaterThanZero(uint32 root);
+    error IncrementalMerkleTree__DepthShouldBeLessThan32(uint32 root);
     error IncrementalMerkleTree__IndexOutOfBounds(uint32 index);
     error IncrementalMerkleTree__MerkleTreeFull(uint32 nextLeafIndex);
     
     constructor(uint32 _depth, Poseidon2 _hasher) {
         if(_depth == 0) {
-            revert IncrementalMerkleTree__DepthShouldBeGreaterThanZero();
+            revert IncrementalMerkleTree__DepthShouldBeGreaterThanZero(_depth);
         }
 
         if(_depth >= 32) {
-            revert IncrementalMerkleTree__DepthShouldBeLessThan32();
+            revert IncrementalMerkleTree__DepthShouldBeLessThan32(_depth);
         }
         i_depth = _depth;
         i_hasher = _hasher;
