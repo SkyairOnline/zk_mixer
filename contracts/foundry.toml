@@ -5,7 +5,8 @@ libs = ["lib"]
 ffi = true
 
 remappings = [
-    '@poseidon/=lib/poseidon2-evm/'
+    '@poseidon/=lib/poseidon2-evm/',
+    '@openzeppelin/=lib/openzeppelin-contracts/'
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

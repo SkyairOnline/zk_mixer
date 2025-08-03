@@ -3,8 +3,9 @@ pragma solidity ^0.8.24;
 
 import {IncrementalMerkleTree, Poseidon2} from "./IncrementalMerkleTree.sol";
 import {IVerifier} from "./Verifier.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Mixer is IncrementalMerkleTree {
+contract Mixer is IncrementalMerkleTree, ReentrancyGuard {
     IVerifier public immutable i_verifier;
 
     // mapping to store whether a commitment has been used
@@ -30,7 +31,7 @@ contract Mixer is IncrementalMerkleTree {
 
     // @notice Deposit funds into the mixer
     // @param _commitment the poseiden commitment of the nullifier and secret (generated off-chain)
-    function deposit(bytes32 _commitment) external payable {
+    function deposit(bytes32 _commitment) external payable nonReentrant {
         // check whether the commitment has already been used so we can prevent a deposit being added twice
         if (s_commitments[_commitment]) {
             revert Mixer__CommitmentAlreadyAdded(_commitment);
@@ -48,7 +49,7 @@ contract Mixer is IncrementalMerkleTree {
 
     // @notice Withdraw funds from the mixer in a private way
     // @param _proof proof that the user has the right to withdraw (they know a valid commitment)
-    function withdraw(bytes memory _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient) external {
+    function withdraw(bytes memory _proof, bytes32 _root, bytes32 _nullifierHash, address payable _recipient) external nonReentrant {
         // check that the root that was used in the proof mathces the root on-chain
         if(!isKnownRoot(_root)) {
             revert Mixer__UnknownRoot(_root);
