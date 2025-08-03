@@ -7,8 +7,8 @@ export default async function generateCommitment(): Promise<string> {
     const secret = Fr.random();
     const commitment: Fr = await bb.poseidon2Hash([nullifier, secret]);
     const result = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["bytes32"],
-        [commitment.toBuffer()]
+        ["bytes32", "bytes32", "bytes32"],
+        [commitment.toBuffer(), nullifier.toBuffer(), secret.toBuffer()]
     );
     return result;
 }

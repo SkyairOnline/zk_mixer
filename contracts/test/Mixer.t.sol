@@ -24,7 +24,7 @@ contract MixerTest is Test {
         mixer = new Mixer(verifier, hasher, 20);
     }
 
-    function _getCommitment() public returns (bytes32 _commitment) {
+    function _getCommitment() public returns (bytes32 _commitment, bytes32 _nullifier, bytes32 _secret) {
         string[] memory inputs = new string[](3);
         inputs[0] = "npx";
         inputs[1] = "tsx";
@@ -32,14 +32,33 @@ contract MixerTest is Test {
         // use ffi to run scripts in the CLI to create the commitment
         bytes memory result = vm.ffi(inputs);
         // ABI decode result
-        _commitment = abi.decode(result, (bytes32));
+        (_commitment, _nullifier, _secret) = abi.decode(result, (bytes32, bytes32, bytes32));
     }
 
     function testMakeDeposit() public {
         // create a commitment
         // make a deposit
-        bytes32 commitment = _getCommitment();
+        (bytes32 _commitment, bytes32 _nullifier, bytes32 _secret) = _getCommitment();
         console.log("Commitment: ");
-        console.logBytes32(commitment);
+        console.logBytes32(_commitment);
+        vm.expectEmit(true, false, false, true);
+        emit Mixer.Deposit(_commitment, 0, block.timestamp);
+        mixer.deposit{value: mixer.DENOMINATION()}(_commitment);
+    }
+
+    function testMakeWithdrawal() public {
+        // create a commitment
+        // make a deposit
+        (bytes32 _commitment, bytes32 _nullifier, bytes32 _secret) = _getCommitment();
+        console.log("Commitment: ");
+        console.logBytes32(_commitment);
+        vm.expectEmit(true, false, false, true);
+        emit Mixer.Deposit(_commitment, 0, block.timestamp);
+        mixer.deposit{value: mixer.DENOMINATION()}(_commitment);
+
+        // create a proof
+        bytes memory _proof = _getProof(_nullifier, _secret, recipient, leaves);
+
+        // make a withdrawal
     }
 }
