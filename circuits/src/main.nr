@@ -16,7 +16,7 @@ fn main(
     // comput the commitment Poseidon(nullifier, secret)
     let commitment = poseidon2::Poseidon2::hash([nullifier, secret], 2);
     // check that the nullifier matches the nullifier hash
-    let computed_nullifier_hash = poseidon2::Poseidon2::hash([commitment], 1);
+    let computed_nullifier_hash = poseidon2::Poseidon2::hash([nullifier], 1);
     assert(computed_nullifier_hash == nullifier_hash);
 
     // check that the commitment is in the Merkle tree

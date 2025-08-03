@@ -64,12 +64,12 @@ library HonkVerificationKey {
                y: uint256(0x001d6853a4b3952cdd7cf1c82959e1391416c561c3ee32f6d903fdfba564466c)
             }),
             s1: Honk.G1Point({ 
-               x: uint256(0x2d8cbbc5753b9e3d8800084bf4d09dea4e327d026c7f451c1939fe13c7d4a428),
-               y: uint256(0x260327955d0fcca84c8c3352e0c0600e03e7d3c040b9f8b4536c3aa2b6dd1fe0)
+               x: uint256(0x19b2bf47f0470261f4cfa3ff0dc3fcfee1561b20564d76b4b0d1824b358fd0f2),
+               y: uint256(0x07ddce65c3e587cfe2f280f60c5c9cecc54b8bc489ef54aa94058fbdb43ed36c)
             }),
             s2: Honk.G1Point({ 
-               x: uint256(0x01e20f285db1c96ebc6ae444c13a5ed584b23c7fae2ff9057e6338ae837ea991),
-               y: uint256(0x11d4d83d6041ea51c48da231eae96ba2b9f61fa53d00b2d60e6dc3e5e4f693cd)
+               x: uint256(0x0ee7392db51c77860b27f9402c07bd8a94afe893c9eb98bc9bf0263c0fd8b830),
+               y: uint256(0x045d854b5ef1b8ee93c7595744938240f7e21e68d8acbc182162f43ed0c0a150)
             }),
             s3: Honk.G1Point({ 
                x: uint256(0x2311e3994d9f531ec041666851c02a0cc05d885c3c39222dcda28b6d96b593e5),
