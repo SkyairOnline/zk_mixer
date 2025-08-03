@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+/**
+ * @title Incremental Merkle Tree
+ * @author Aldo Surya Ongko
+ * @notice This contract implements an incremental Merkle tree using the Poseidon2 hash function.
+ * @dev The original design and cryptographic structure are inspired by Tornado Cash:
+ *      https://github.com/tornadocash/tornado-core
+ * @notice Do not deploy this contract to mainnet or use it for handling real funds.
+ */
+
 import {Poseidon2, Field} from "@poseidon/src/Poseidon2.sol";
 
 contract IncrementalMerkleTree {
@@ -35,6 +44,9 @@ contract IncrementalMerkleTree {
         s_roots[0] = zeros(_depth);
     }
 
+    /// @notice Inserts a leaf into the incremental Merkle tree
+    /// @param _leaf the leaf to insert into the tree
+    /// @return the index of the leaf that was inserted 
     function _insert(bytes32 _leaf) internal returns (uint32){
         // add the leaf to the incremental merkle tree
         uint32 _nextLeafIndex = s_nextLeafIndex;
@@ -73,6 +85,9 @@ contract IncrementalMerkleTree {
         return _nextLeafIndex;
     }
 
+    /// @notice Checks if a root is known in the Merkle tree
+    /// @param _root the root to check
+    /// @return true if the root is known, false otherwise
     function isKnownRoot(bytes32 _root) public view returns (bool) {
         // check if the root is zero
         if (_root == bytes32(0)) {
@@ -93,6 +108,9 @@ contract IncrementalMerkleTree {
         return false;
     }
 
+    /// @notice Returns the zero subtree for a given index
+    /// @param i the index of the zero subtree
+    /// @return the zero subtree at index i
     function zeros(uint32 i) public pure returns (bytes32) {
         if (i == 0) return bytes32(0x0d823319708ab99ec915efd4f7e03d11ca1790918e8f04cd14100aceca2aa9ff);
         else if (i == 1) return bytes32(0x170a9598425eb05eb8dc06986c6afc717811e874326a79576c02d338bdf14f13);

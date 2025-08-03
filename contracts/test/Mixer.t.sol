@@ -70,9 +70,10 @@ contract MixerTest is Test {
         emit Mixer.Deposit(_commitment, 0, block.timestamp);
         mixer.deposit{value: mixer.DENOMINATION()}(_commitment);
 
+        // create a proof
         bytes32[] memory leaves = new bytes32[](1);
         leaves[0] = _commitment;
-        // create a proof
+        // get the proof
         (bytes memory _proof, bytes32[] memory _publicInputs) = _getProof(_nullifier, _secret, recipient, leaves);
         assertTrue(verifier.verify(_proof, _publicInputs));
         // make a withdrawal
@@ -81,5 +82,27 @@ contract MixerTest is Test {
         mixer.withdraw(_proof, _publicInputs[0], _publicInputs[1], payable(address(uint160(uint256(_publicInputs[2])))));
         assertEq(recipient.balance, mixer.DENOMINATION());
         assertEq(address(mixer).balance, 0);
+    }
+
+    function testAnotherAddressSendProof() public {
+        // make a deposit
+        (bytes32 _commitment, bytes32 _nullifier, bytes32 _secret) = _getCommitment();
+        vm.expectEmit(true, false, false, true);
+        emit Mixer.Deposit(_commitment, 0, block.timestamp);
+        mixer.deposit{value: mixer.DENOMINATION()}(_commitment);
+
+        // create a proof using the nullifier and secret
+        bytes32[] memory leaves = new bytes32[](1);
+        leaves[0] = _commitment;
+
+        // create a proof
+        (bytes memory _proof, bytes32[] memory _publicInputs) = _getProof(_nullifier, _secret, recipient, leaves);
+
+
+        // make a withdrawal from another address
+        address attacker = makeAddr("attacker");
+        vm.prank(attacker);
+        vm.expectRevert();
+        mixer.withdraw(_proof, _publicInputs[0], _publicInputs[1], payable(attacker));
     }
 }
