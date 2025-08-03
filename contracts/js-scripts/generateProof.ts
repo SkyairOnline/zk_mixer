@@ -36,11 +36,11 @@ export default async function generateProof() {
         }
         const { witness } = await noir.execute(input);
         const originalLog = console.log;
-        const { proof } = await honk.generateProof(witness, { keccak: true });
+        const { proof, publicInputs } = await honk.generateProof(witness, { keccak: true });
         console.log = originalLog; // Restore console.log
         const result = ethers.AbiCoder.defaultAbiCoder().encode(
-            ["bytes"],
-            [proof]
+            ["bytes", "bytes32[]"],
+            [proof, publicInputs]
         );
         return result;
     } catch (error) {
